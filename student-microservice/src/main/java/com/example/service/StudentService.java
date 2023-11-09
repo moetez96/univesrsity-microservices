@@ -20,36 +20,44 @@ public class StudentService {
     WebClient webClient;
 
     public StudentResponse createStudent(CreateStudentRequest createStudentRequest) {
+        try {
+            Student student = new Student();
+            student.setFirstName(createStudentRequest.getFirstName());
+            student.setLastName(createStudentRequest.getLastName());
+            student.setEmail(createStudentRequest.getEmail());
 
-        Student student = new Student();
-        student.setFirstName(createStudentRequest.getFirstName());
-        student.setLastName(createStudentRequest.getLastName());
-        student.setEmail(createStudentRequest.getEmail());
+            student.setAddressId(createStudentRequest.getAddressId());
+            student = studentRepository.save(student);
 
-        student.setAddressId(createStudentRequest.getAddressId());
-        student = studentRepository.save(student);
+            StudentResponse studentResponse = new StudentResponse(student);
+            studentResponse.setAddressResponse(getAddressById(student.getAddressId()));
 
-
-        StudentResponse studentResponse = new StudentResponse(student);
-        studentResponse.setAddressResponse(getAddressById(student.getAddressId()));
-
-        return studentResponse;
+            return studentResponse;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create student: " + e.getMessage());
+        }
     }
 
     public StudentResponse getById (long id) {
-
-        Student student = studentRepository.findById(id).get();
-        StudentResponse studentResponse = new StudentResponse(student);
-        studentResponse.setAddressResponse(getAddressById(student.getAddressId()));
-        return studentResponse;
+        try {
+            Student student = studentRepository.findById(id).orElseThrow();
+            StudentResponse studentResponse = new StudentResponse(student);
+            studentResponse.setAddressResponse(getAddressById(student.getAddressId()));
+            return studentResponse;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get student by ID: " + e.getMessage());
+        }
     }
 
     public AddressResponse getAddressById(long addressId) {
+        try {
+            Mono<AddressResponse> addressResponseMono = webClient.get().uri("/getById/" + addressId).retrieve()
+                    .bodyToMono(AddressResponse.class);
 
-        Mono<AddressResponse> addressResponseMono = webClient.get().uri("/getById/" + addressId).retrieve()
-                .bodyToMono(AddressResponse.class);
-
-        return addressResponseMono.block();
+            return addressResponseMono.block();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get address by ID: " + e.getMessage());
+        }
     }
 
 }
