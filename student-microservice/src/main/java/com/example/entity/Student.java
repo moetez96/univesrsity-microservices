@@ -59,11 +59,11 @@ public class Student {
         this.email = email;
     }
 
-    public long getAddress() {
+    public long getAddressId() {
         return addressId;
     }
 
-    public void setAddress(long addressId) {
+    public void setAddressId(long addressId) {
         this.addressId = addressId;
     }
 

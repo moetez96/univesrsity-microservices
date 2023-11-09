@@ -12,6 +12,8 @@ public class StudentResponse {
 
     private String email;
 
+    private AddressResponse addressResponse;
+
     public StudentResponse(Student student) {
         this.id = student.getId();
         this.firstName = student.getFirstName();
@@ -51,5 +53,11 @@ public class StudentResponse {
         this.email = email;
     }
 
+    public AddressResponse getAddressResponse() {
+        return addressResponse;
+    }
 
+    public void setAddressResponse(AddressResponse addressResponse) {
+        this.addressResponse = addressResponse;
+    }
 }
