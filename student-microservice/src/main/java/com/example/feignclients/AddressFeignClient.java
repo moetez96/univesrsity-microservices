@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(value = "address-microservice", path = "/api/address")
+@FeignClient(value = "api-gateway", path = "address-microservice/api/address")
 public interface AddressFeignClient {
 
     @GetMapping("/getById/{id}")
