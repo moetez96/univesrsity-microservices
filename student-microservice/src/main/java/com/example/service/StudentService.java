@@ -6,6 +6,7 @@ import com.example.repository.StudentRepository;
 import com.example.request.CreateStudentRequest;
 import com.example.response.AddressResponse;
 import com.example.response.StudentResponse;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -34,8 +35,7 @@ public class StudentService {
             student = studentRepository.save(student);
 
             StudentResponse studentResponse = new StudentResponse(student);
-            // studentResponse.setAddressResponse(getAddressById(student.getAddressId()));
-            studentResponse.setAddressResponse(addressFeignClient.getById(student.getAddressId()).getBody());
+            studentResponse.setAddressResponse(getAddressById(student.getAddressId()));
 
             return studentResponse;
         } catch (Exception e) {
@@ -47,22 +47,26 @@ public class StudentService {
         try {
             Student student = studentRepository.findById(id).orElseThrow();
             StudentResponse studentResponse = new StudentResponse(student);
-            studentResponse.setAddressResponse(addressFeignClient.getById(student.getAddressId()).getBody());
+
+            studentResponse.setAddressResponse(getAddressById(student.getAddressId()));
+
             return studentResponse;
         } catch (Exception e) {
             throw new RuntimeException("Failed to get student by ID: " + e.getMessage());
         }
     }
 
+    @CircuitBreaker(name = "addressMicroService", fallbackMethod = "fallbackGetAddressById")
     public AddressResponse getAddressById(long addressId) {
         try {
-            Mono<AddressResponse> addressResponseMono = webClient.get().uri("/getById/" + addressId).retrieve()
-                    .bodyToMono(AddressResponse.class);
-
-            return addressResponseMono.block();
+            return addressFeignClient.getById(addressId).getBody();
         } catch (Exception e) {
             throw new RuntimeException("Failed to get address by ID: " + e.getMessage());
         }
+    }
+
+    public AddressResponse fallbackGetAddressById(long addressId, Throwable throwable) {
+        return new AddressResponse();
     }
 
 }
