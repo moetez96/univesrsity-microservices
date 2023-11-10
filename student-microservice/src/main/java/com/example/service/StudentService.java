@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.entity.Student;
+import com.example.feignclients.AddressFeignClient;
 import com.example.repository.StudentRepository;
 import com.example.request.CreateStudentRequest;
 import com.example.response.AddressResponse;
@@ -19,6 +20,9 @@ public class StudentService {
     @Autowired
     WebClient webClient;
 
+    @Autowired
+    AddressFeignClient addressFeignClient;
+
     public StudentResponse createStudent(CreateStudentRequest createStudentRequest) {
         try {
             Student student = new Student();
@@ -30,7 +34,8 @@ public class StudentService {
             student = studentRepository.save(student);
 
             StudentResponse studentResponse = new StudentResponse(student);
-            studentResponse.setAddressResponse(getAddressById(student.getAddressId()));
+            // studentResponse.setAddressResponse(getAddressById(student.getAddressId()));
+            studentResponse.setAddressResponse(addressFeignClient.getById(student.getAddressId()).getBody());
 
             return studentResponse;
         } catch (Exception e) {
@@ -42,7 +47,7 @@ public class StudentService {
         try {
             Student student = studentRepository.findById(id).orElseThrow();
             StudentResponse studentResponse = new StudentResponse(student);
-            studentResponse.setAddressResponse(getAddressById(student.getAddressId()));
+            studentResponse.setAddressResponse(addressFeignClient.getById(student.getAddressId()).getBody());
             return studentResponse;
         } catch (Exception e) {
             throw new RuntimeException("Failed to get student by ID: " + e.getMessage());

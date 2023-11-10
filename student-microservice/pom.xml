@@ -15,6 +15,7 @@
     <description>student-microservice</description>
     <properties>
         <java.version>17</java.version>
+        <spring.cloud.version>4.0.4</spring.cloud.version>
     </properties>
     <dependencies>
         <dependency>
@@ -29,6 +30,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <version>${spring.cloud.version}</version>
         </dependency>
 
         <dependency>
